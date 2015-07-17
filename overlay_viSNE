@@ -1,0 +1,42 @@
+% overlay_viSNE.m
+% 
+% overlay cells that were not used in construction of a viSNE map 
+% (but with the same number of parameters), with the
+% viSNE map, based on similarity. For each cell, similarity with all cells
+% in the viSNE map is calculated (based on all 12 parameters), and the
+% location if the most similar cell is chosen. 
+%
+
+% from viSNE mat session you load two datasets:
+%   SNE - dataset, with each particle of the viSNE map represented by a row 
+%    and the two SNE component values given in the two columns
+%   Sample - dataset, with each particle of the viSNE map represented by a
+%    row, and the 12 flow cytometry measurements represented 
+
+% scatterplot of the viSNE map
+scatter(SNE(:,1), SNE(:,2),'.')
+hold on
+
+% load the data from the cells you want to overlay:
+%   forOverlay - each particle is in a row, while the 12 flow cytometry measurements
+%       are in the columns. We advise that you do not use many more than
+%       3000 cells due to long calculations times. 
+
+% calculate the closest cell from Sample
+
+distancematrix = zeros(size(forOverlay,1),size(Sample,1));
+for ii = 1: size(forOverlay,1)
+    for jj = 1:size(Sample,1)
+        distancematrix(ii,jj)=norm(forOverlay(ii,:)-Sample(jj,:));
+    end   
+end
+% find the best match for each of 3000 singleSpec datapoints
+[mini, tempindex] = min(distancematrix');
+% find the SNE coordinates for all those points
+coordinates = zeros(size(forOverlay,1),2);
+for ii = 1:size(forOverlay,1)
+    coordinates(ii,:) = SNE(tempindex(ii),:);
+end
+% plot the points on the viSNE map
+scatter(coordinates(:,1), coordinates(:,2), 50,'r', 'filled' )
+
